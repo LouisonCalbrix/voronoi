@@ -1,2 +1,3 @@
+![banner-picture](banner.png "example of voronoi diagram produced with this program")
 # voronoi
-javascript program to draw a voronoi diagram
+Javascript program to draw a voronoi diagram
