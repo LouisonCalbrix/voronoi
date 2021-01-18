@@ -30,64 +30,64 @@ const voronoi = function(points, width, height) {
         return vorArray[y][x];
     }
 
-    // Closure:
-    // Compute in place the voronoi diagram
-    const makeDiagram = function([startX, startY], [totalWidth, totalHeight]) {
-        const quadrants = new Array({
-            x: startX, 
-            y: startY,
-            width: totalWidth,
-            height: totalHeight
-        });
-        while (quadrants.length !== 0) {
-            const {x, y, width, height} = quadrants.shift();
-            const [upperLeft, upperRight, bottomLeft, bottomRight] = 
-                [[x, y], [x+width-1, y], [x, y+height-1], [x+width-1, y+height-1]];
-            const closest1 = getClosest(upperLeft);
-            if (closest1 === getClosest(upperRight) &&
-                closest1 === getClosest(bottomLeft) &&
-                closest1 === getClosest(bottomRight)) {
-                for (let j=y; j<y+height; j++)
-                    for (let i=x; i<x+width; i++)
-                        vorArray[j][i] = closest1;
-            } else {
-                const subWidth1 = Math.floor(width/2);
-                const subWidth2 = width - subWidth1;
-                const subHeight1 = Math.floor(height/2);
-                const subHeight2 = height - subHeight1;
-                if (subWidth1 !== 0) {
-                    if (subHeight1 !== 0)
-                        quadrants.push({
-                            x: x,
-                            y: y,
-                            width: subWidth1,
-                            height: subHeight1
-                        });
-                    quadrants.push({
-                        x: x,
-                        y: y+subHeight1,
-                        width: subWidth1,
-                        height: subHeight2
-                    });
-                }
+    // Add the whole picture as the first quadrant
+    const quadrants = new Array({
+        x: 0, 
+        y: 0,
+        width,
+        height
+    });
+    // As long as all the quadrants haven't been processed
+    while (quadrants.length !== 0) {
+        const {x, y, width, height} = quadrants.shift();
+        const [upperLeft, upperRight, bottomLeft, bottomRight] = 
+            [[x, y], [x+width-1, y], [x, y+height-1], [x+width-1, y+height-1]];
+        const closest1 = getClosest(upperLeft);
+
+        if (closest1 === getClosest(upperRight) &&
+            // assign all points in the current quadrant to the same cell
+            closest1 === getClosest(bottomLeft) &&
+            closest1 === getClosest(bottomRight)) {
+            for (let j=y; j<y+height; j++)
+                for (let i=x; i<x+width; i++)
+                    vorArray[j][i] = closest1;
+        } else {
+            // divide current quadrant into four smaller ones and recursively process
+            const subWidth1 = Math.floor(width/2);
+            const subWidth2 = width - subWidth1;
+            const subHeight1 = Math.floor(height/2);
+            const subHeight2 = height - subHeight1;
+            if (subWidth1 !== 0) {
                 if (subHeight1 !== 0)
                     quadrants.push({
-                        x: x+subWidth1,
+                        x: x,
                         y: y,
-                        width: subWidth2,
+                        width: subWidth1,
                         height: subHeight1
                     });
                 quadrants.push({
-                    x: x+subWidth1,
+                    x: x,
                     y: y+subHeight1,
-                    width: subWidth2,
+                    width: subWidth1,
                     height: subHeight2
                 });
             }
+            if (subHeight1 !== 0)
+                quadrants.push({
+                    x: x+subWidth1,
+                    y: y,
+                    width: subWidth2,
+                    height: subHeight1
+                });
+            quadrants.push({
+                x: x+subWidth1,
+                y: y+subHeight1,
+                width: subWidth2,
+                height: subHeight2
+            });
         }
     }
 
-    makeDiagram([0, 0], [width, height]);
     return vorArray;
 }
 
